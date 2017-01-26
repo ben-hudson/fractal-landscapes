@@ -12,6 +12,7 @@
 
 #define ROUGHNESS (0.5)
 
+// random float between min and max
 float frand(float min, float max) {
   float f = (float)rand()/RAND_MAX;
   return min + f*(max - min);
@@ -25,7 +26,17 @@ void set(float *map, int x, int y, float v) {
   map[y*SIZE + x] = v;
 }
 
-// initialize corners between 0 and 1
+// ew
+int wrap(int a) {
+  int m = 0;
+  if (a < 0) {
+    m = 1;
+  } else if (a >= SIZE) {
+    m = -1;
+  }
+  return a + m*(SIZE - 1);
+}
+
 void seed(float *map) {
   srand(time(NULL));
   set(map, WEST, NORTH, frand(0, 1));
@@ -37,56 +48,21 @@ void seed(float *map) {
 void square(float *map, int x, int y, int l) {
   printf("doing square on (%d, %d)\n", x, y);
   int n = y + l, e = x + l, s = y - l, w = x - l;
-  float v = 0.25*get(map, w, n) + 0.25*get(map, e, n) + 0.25*get(map, e, s) + 0.25*get(map, w, s) + frand(-ROUGHNESS*l, ROUGHNESS*l);
+  float v = 0.25*get(map, w, n) + 0.25*get(map, e, n) + 0.25*get(map, e, s)
+      + 0.25*get(map, w, s) + frand(-ROUGHNESS*l, ROUGHNESS*l);
   set(map, x, y, v);
 }
 
-// TODO: add wrapping
 void diamond(float *map, int x, int y, int l) {
   printf("doing diamond on (%d, %d)\n", x, y);
-  // if point is unset (is NaN)
+  // if point is unset
   if (get(map, x, y) != get(map, x, y)) {
-    int n = y + l, e = x + l, s = y - l, w = x - l;
-    // printf("(x, y) = (%d, %d)\n", x, y);
-    // printf("n = %d, e = %d, s = %d, w = %d\n", n, e, s, w);
-    float v;
-    if (x == WEST) {
-      //printf("WEST!\n");
-      v = 0.33*get(map, x, n) + 0.33*get(map, e, y) + 0.33*get(map, x, s);
-    } else if (y == NORTH) {
-      //printf("NORTH!\n");
-      v = 0.33*get(map, w, y) + 0.33*get(map, e, y) + 0.33*get(map, x, s);
-    } else if (x == EAST) {
-      //printf("EAST!\n");
-      v = 0.33*get(map, w, y) + 0.33*get(map, x, n) + 0.33*get(map, x, s);
-    } else if (y == SOUTH) {
-      //printf("SOUTH!\n");
-      v = 0.33*get(map, w, y) + 0.33*get(map, x, n) + 0.33*get(map, e, y);
-    } else {
-      v = 0.25*get(map, w, y) + 0.25*get(map, x, n) + 0.25*get(map, e, y) + 0.25*get(map, x, s);
-    }
-    v += frand(-ROUGHNESS*l, ROUGHNESS*l);
+    int n = wrap(y + l), e = wrap(x + l), s = wrap(y - l), w = wrap(x - l);
+    float v = 0.25*get(map, w, y) + 0.25*get(map, x, n) + 0.25*get(map, e, y)
+        + 0.25*get(map, x, s) + frand(-ROUGHNESS*l, ROUGHNESS*l);
     set(map, x, y, v);
-  } else {
-    printf("already set\n");
   }
 }
-
-/*void step(float *map, int x, int y, int l) {
-  // printf("l = %d\n", l);
-  if (l > 0) {
-    square(map, x, y, l);
-    diamond(map, x - l, y, l);
-    diamond(map, x, y - l, l);
-    diamond(map, x + l, y, l);
-    diamond(map, x, y + l, l);
-
-    step(map, x - l/2, y + l/2, l/2);
-    step(map, x + l/2, y + l/2, l/2);
-    step(map, x - l/2, y - l/2, l/2);
-    step(map, x + l/2, y - l/2, l/2);
-  }
-}*/
 
 void generate(float *map, int l) {
   int i, j;
@@ -109,26 +85,25 @@ void generate(float *map, int l) {
   }
 }
 
-// TODO: delete me
-void display(float *map) {
-  int x, y;
-  for (y = 0; y < SIZE; y++) {
-    for (x = 0; x < SIZE; x++) {
-      printf("%f ", get(map, x, y));
-    }
-    printf("\n");
-  }
-  printf("\n");
-}
+// // TODO: delete me
+// void display(float *map) {
+//   int x, y;
+//   for (y = 0; y < SIZE; y++) {
+//     for (x = 0; x < SIZE; x++) {
+//       printf("%f ", get(map, x, y));
+//     }
+//     printf("\n");
+//   }
+//   printf("\n");
+// }
 
 int main(int argc, char const *argv[]) {
   float *map = (float *)malloc(sizeof(float)*SIZE*SIZE);
   for (int i = 0; i < SIZE*SIZE; map[i++] = NAN);
+  // ^ this guy
 
   seed(map);
-  display(map);
   generate(map, SIZE/2);
-  display(map);
   free(map);
   return 0;
 }
