@@ -1,0 +1,16 @@
+{
+  "folders":[
+    {
+      "path":".",
+      "folder_exclude_patterns":[
+        "build"
+      ]
+    }
+  ],
+  "build_systems":[
+    {
+      "name":"Build",
+      "shell_cmd":"gcc -o ../build/main main.c && ./../build/main"
+    }
+  ]
+}
