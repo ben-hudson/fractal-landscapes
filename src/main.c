@@ -1,63 +1,68 @@
-#include <SDL2/SDL.h>
+#include <GL/glut.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "landscape.h"
 
-#define SIZE  (513)
+#define ROUGHNESS (0.2)
 
-int main(int argc, char const *argv[]) {
-  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-    return 1;
+#define GRID_SIZE    (65)
+#define GRID_SPACING (0.4)
+
+static Landscape *landscape = NULL;
+
+void cleanup(void) {
+  if (landscape) {
+    landscape_destroy_landscape(landscape);
   }
-  SDL_Window *window = SDL_CreateWindow("maps 'n shit", 100, 100, SIZE, SIZE, SDL_WINDOW_SHOWN);
-  SDL_Surface *surf = SDL_GetWindowSurface(window);
+}
 
-  Landscape *landscape = landscape_create_landscape(SIZE, 0.2);
+void display(void) {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  glBegin(GL_QUADS);
+  for (int i = 0; i < landscape->size - 1; i++) {
+    for (int j = 0; j < landscape->size - 1; j++) {
+      glVertex3f(i*GRID_SPACING, j*GRID_SPACING, landscape_get_height(landscape, i, j));
+      glVertex3f(i*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i, j + 1));
+      glVertex3f((i + 1)*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i + 1, j + 1));
+      glVertex3f((i + 1)*GRID_SPACING, j*GRID_SPACING, landscape_get_height(landscape, i + 1, j));
+    }
+  }
+  glEnd();
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, -20.0); // move into center
+  glRotatef(-60.0, 1.0, 0.0, 0.0); // rotate instead of the camera
+  glTranslatef(0, 6.0, 4.0);
+
+  glutSwapBuffers();
+}
+
+void reshape(int w, int h) {
+  glViewport (0, 0, w, h);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(60.0, 1.0, 1.5, 50.0);
+}
+
+int main(int argc, char *argv[]) {
+  atexit(cleanup); // fu glut
+
+  landscape = landscape_create_landscape(GRID_SIZE, ROUGHNESS);
   landscape_raise_landscape(landscape);
 
-  // this is a 2D test
-  float max = -1000000, min = 1000000; // hup
-  for (int i = 0; i < landscape->size*landscape->size; i++) {
-    if (landscape->heights[i] > max) {
-      max = landscape->heights[i];
-    }
-    if (landscape->heights[i] < min) {
-      min = landscape->heights[i];
-    }
-  }
-  // remap heights to colours
-  int *bitmap = (int *)malloc(sizeof(int)*landscape->size*landscape->size);
-  unsigned char height;
-  for (int i = 0; i < landscape->size*landscape->size; i++) {
-    height = 255*(landscape->heights[i] - min)/(max - min);
-    bitmap[i] = 0 | height << 24 | height << 16 | height << 8;
-  }
-  SDL_Surface *map = SDL_CreateRGBSurfaceFrom(bitmap, SIZE, SIZE, sizeof(int)*8, SIZE*sizeof(int), 0xFF000000, 0x00FF0000, 0x0000FF00, 0x00000000);
-  if (map == NULL) {
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-    return 1;
-  }
-  SDL_BlitSurface(map, NULL, surf, NULL);
-  SDL_FreeSurface(map);
-  free(bitmap);
+  glutInit(&argc, argv);
+  glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+  glutInitWindowSize (500, 500);
+  glutCreateWindow("Fractal Landscapes");
 
-  SDL_Event e;
-  bool run = true;
-  while(run) {
-    while(SDL_PollEvent(&e)) {
-      if (e.type == SDL_QUIT) {
-        run = false;
-      }
-    }
-    SDL_UpdateWindowSurface(window);
-  }
+  glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-  landscape_destroy_landscape(landscape);
 
-  SDL_DestroyWindow(window);
-  SDL_Quit();
+  glutDisplayFunc(display);
+  glutReshapeFunc(reshape);
+  glutMainLoop();
+
   return 0;
 }

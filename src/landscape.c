@@ -2,7 +2,6 @@
 
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 // return random float between min and max
@@ -84,7 +83,12 @@ Landscape *landscape_create_landscape(int size, float roughness) {
     map->size = size;
     map->roughness = roughness;
     map->heights = (float *)malloc(sizeof(float)*size*size);
+    if (map->heights) {
     landscape_flatten_landscape(map);
+    } else {
+      free(map);
+      map = NULL;
+    }
   }
 
   return map;
@@ -109,4 +113,12 @@ bool landscape_raise_landscape(Landscape *map) {
 bool landscape_flatten_landscape(Landscape *map) {
   for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
   return true;
+}
+
+float landscape_get_height(Landscape *map, int x, int y) {
+  if (x >= map->size || y >= map->size) {
+    return 0;
+  }
+
+  return get(map, x, y);
 }
