@@ -1,2 +1,4 @@
 build
 maps.sublime-workspace
+*.gch
+*.out
