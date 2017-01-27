@@ -1,4 +1,5 @@
 build
 maps.sublime-workspace
+src/test.c
 *.gch
 *.out

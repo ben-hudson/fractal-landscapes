@@ -10,7 +10,7 @@
   "build_systems":[
     {
       "name":"Build",
-      "shell_cmd":"gcc -o ../build/main main.c && ./../build/main"
+      "shell_cmd":"gcc -o ../build/main main.c `pkg-config --cflags --libs sdl2` && ./../build/main"
     }
   ]
 }
