@@ -1,5 +1,6 @@
 #include <GL/glut.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "landscape.h"
 
@@ -37,7 +38,7 @@ void display(void) {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glRotatef(rotation, 0.0, 0.0, 1.0);
-  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, 0.0); // center x
+  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, 5.0); // center x
 
   glutSwapBuffers();
 }
@@ -49,11 +50,12 @@ void refresh(int value) {
 }
 
 void reshape(int w, int h) {
+  printf("(%d, %d)\n", w, h);
   glViewport (0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60.0, 1.0, 0.0, 50.0);
-  gluLookAt(0.0, 80.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  glOrtho(-30.0*w/h, 30.0*w/h, -30.0, 30.0, -300.0, 300.0);
+  gluLookAt(0.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 int main(int argc, char *argv[]) {
@@ -64,7 +66,7 @@ int main(int argc, char *argv[]) {
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
-  glutInitWindowSize (500, 500);
+  glutInitWindowSize (1100, 400);
   glutCreateWindow("Fractal Landscapes");
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
