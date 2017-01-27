@@ -3,12 +3,16 @@
 
 #include "landscape.h"
 
-#define ROUGHNESS (0.2)
+#define ROUGHNESS    (0.4)
 
 #define GRID_SIZE    (65)
-#define GRID_SPACING (0.4)
+#define GRID_SPACING (1)
+
+#define FRAME_RATE   (30)
+#define FRAME_PERIOD (1000/FRAME_RATE)
 
 static Landscape *landscape = NULL;
+static int rotation = 0;
 
 void cleanup(void) {
   if (landscape) {
@@ -32,18 +36,24 @@ void display(void) {
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, -20.0); // move into center
-  glRotatef(-60.0, 1.0, 0.0, 0.0); // rotate instead of the camera
-  glTranslatef(0, 6.0, 4.0);
+  glRotatef(rotation, 0.0, 0.0, 1.0);
+  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, 0.0); // center x
 
   glutSwapBuffers();
+}
+
+void refresh(int value) {
+  rotation = (rotation + 1)%360;
+  glutTimerFunc(FRAME_PERIOD, refresh, 0);
+  glutPostRedisplay();
 }
 
 void reshape(int w, int h) {
   glViewport (0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(60.0, 1.0, 1.5, 50.0);
+  gluPerspective(60.0, 1.0, 0.0, 50.0);
+  gluLookAt(0.0, 80.0, 40.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 int main(int argc, char *argv[]) {
@@ -59,10 +69,9 @@ int main(int argc, char *argv[]) {
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
+  glutTimerFunc(FRAME_PERIOD, refresh, 0);
   glutMainLoop();
-
   return 0;
 }
