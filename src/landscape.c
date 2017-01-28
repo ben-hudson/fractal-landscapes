@@ -104,6 +104,13 @@ bool landscape_raise_landscape(Landscape *map) {
   if (get(map, 0, 0) != get(map, 0, 0)) {
     seed(map);
     generate(map);
+
+    // average height is used for centering
+    for (int i = 0; i < map->size*map->size; i++) {
+      map->avg_height += map->heights[i];
+    }
+    map->avg_height /= map->size*map->size;
+
     return true;
   }
 
@@ -112,13 +119,18 @@ bool landscape_raise_landscape(Landscape *map) {
 
 bool landscape_flatten_landscape(Landscape *map) {
   for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
+  map->avg_height = 0;
   return true;
 }
 
 float landscape_get_height(Landscape *map, int x, int y) {
-  if (x >= map->size || y >= map->size) {
-    return 0;
-  }
+  // if (x >= map->size || y >= map->size) {
+  //   return 0;
+  // }
 
   return get(map, x, y);
+}
+
+float landscape_get_avg_height(Landscape *map) {
+  return map->avg_height;
 }

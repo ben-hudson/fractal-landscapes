@@ -24,21 +24,35 @@ void cleanup(void) {
 void display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glBegin(GL_QUADS);
+  glBegin(GL_TRIANGLES);
+  glColor3f(255.0, 255.0, 255.0);
   for (int i = 0; i < landscape->size - 1; i++) {
     for (int j = 0; j < landscape->size - 1; j++) {
       glVertex3f(i*GRID_SPACING, j*GRID_SPACING, landscape_get_height(landscape, i, j));
       glVertex3f(i*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i, j + 1));
-      glVertex3f((i + 1)*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i + 1, j + 1));
+      glVertex3f((i + 1)*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i + 1,
+          j + 1));
+      glVertex3f(i*GRID_SPACING, j*GRID_SPACING, landscape_get_height(landscape, i, j));
       glVertex3f((i + 1)*GRID_SPACING, j*GRID_SPACING, landscape_get_height(landscape, i + 1, j));
+      glVertex3f((i + 1)*GRID_SPACING, (j + 1)*GRID_SPACING, landscape_get_height(landscape, i + 1,
+          j + 1));
     }
   }
+  glColor3f(0.0, 0.0, 255.0);
+  glNormal3f(0.0, 0.0, 1.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(0.0, GRID_SIZE*GRID_SPACING, 0.0);
+  glVertex3f(GRID_SIZE*GRID_SPACING, GRID_SIZE*GRID_SPACING, 0.0);
+  glVertex3f(0.0, 0.0, 0.0);
+  glVertex3f(GRID_SIZE*GRID_SPACING, 0.0, 0.0);
+  glVertex3f(GRID_SIZE*GRID_SPACING, GRID_SIZE*GRID_SPACING, 0.0);
   glEnd();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glRotatef(rotation, 0.0, 0.0, 1.0);
-  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, 5.0); // center x
+  glRotatef(rotation, 0.0, 0.0, 1.0); // spin
+  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING,
+      landscape_get_avg_height(landscape)); // center
 
   glutSwapBuffers();
 }
@@ -50,12 +64,11 @@ void refresh(int value) {
 }
 
 void reshape(int w, int h) {
-  printf("(%d, %d)\n", w, h);
   glViewport (0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(-30.0*w/h, 30.0*w/h, -30.0, 30.0, -300.0, 300.0);
-  gluLookAt(0.0, 1.0, 0.5, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  glOrtho(-30.0*w/h, 30.0*w/h, -30.0, 30.0, -46.0, 46.0);
+  gluLookAt(0.0, 1.0, 0.4, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 int main(int argc, char *argv[]) {
@@ -70,6 +83,7 @@ int main(int argc, char *argv[]) {
   glutCreateWindow("Fractal Landscapes");
 
   glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+  glEnable(GL_DEPTH_TEST);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
