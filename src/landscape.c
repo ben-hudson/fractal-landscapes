@@ -1,8 +1,8 @@
 #include "landscape.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
 #include <time.h>
 
 // return random float between min and max
@@ -17,6 +17,12 @@ float get(Landscape *map, int x, int y) {
 
 void set(Landscape *map, int x, int y, float v) {
   map->heights[y*map->size + x] = v;
+  if (v > map->height_max) {
+    map->height_max = v;
+  }
+  if (v < map->height_min) {
+    map->height_min = v;
+  }
 }
 
 // ew
@@ -30,7 +36,7 @@ int wrap(Landscape *map, int a) {
   return a + m*(map->size - 1);
 }
 
-// set the
+// initialize corners
 void seed(Landscape *map) {
   srand(time(NULL));
   set(map, 0, map->size - 1, frand(0, 1));
@@ -77,36 +83,35 @@ void generate(Landscape *map) {
   }
 }
 
-Landscape *landscape_create_landscape(int size, float roughness) {
-  Landscape *map = (Landscape *)malloc(sizeof(Landscape));
+void reset(Landscape *map) {
+  for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
+  map->height_max = FLT_MIN;
+  map->height_min = FLT_MAX;
+}
 
+Landscape *landscape_create_landscape(int size, float roughness) {
+  Landscape *map = (Landscape *)malloc(sizeof(Landscape) + sizeof(float)*(size*size - 1));
   if (map) {
     map->size = size;
     map->roughness = roughness;
-    map->heights = (float *)malloc(sizeof(float)*size*size);
-    landscape_flatten_landscape(map);
+    reset(map);
   }
-
   return map;
 }
 
 void landscape_destroy_landscape(Landscape *map) {
-  free(map->heights);
   free(map);
 }
 
-bool landscape_raise_landscape(Landscape *map) {
-  // check that map has been reset
-  if (get(map, 0, 0) != get(map, 0, 0)) {
-    seed(map);
-    generate(map);
-    return true;
-  }
-
-  return false;
+void landscape_generate_landscape(Landscape *map) {
+  reset(map);
+  seed(map);
+  generate(map);
 }
 
-bool landscape_flatten_landscape(Landscape *map) {
-  for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
-  return true;
+float landscape_get_height(Landscape *map, int x, int y) {
+  // if (x >= map->size || y >= map->size) {
+  //   return 0;
+  // }
+  return get(map, x, y);
 }
