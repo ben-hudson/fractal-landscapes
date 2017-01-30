@@ -10,8 +10,5 @@ typedef struct {
 
 Landscape *landscape_create_landscape(int size, float roughness);
 void landscape_destroy_landscape(Landscape *landscape);
-
-bool landscape_raise_landscape(Landscape *landscape);
-bool landscape_flatten_landscape(Landscape *landscape);
-
+void landscape_generate_landscape(Landscape *landscape);
 float landscape_get_height(Landscape *landscape, int x, int y);

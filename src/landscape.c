@@ -36,7 +36,7 @@ int wrap(Landscape *map, int a) {
   return a + m*(map->size - 1);
 }
 
-// set the
+// initialize corners
 void seed(Landscape *map) {
   srand(time(NULL));
   set(map, 0, map->size - 1, frand(0, 1));
@@ -83,15 +83,19 @@ void generate(Landscape *map) {
   }
 }
 
+void reset(Landscape *map) {
+  for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
+  map->height_max = FLT_MIN;
+  map->height_min = FLT_MAX;
+}
+
 Landscape *landscape_create_landscape(int size, float roughness) {
   Landscape *map = (Landscape *)malloc(sizeof(Landscape) + sizeof(float)*(size*size - 1));
-
   if (map) {
     map->size = size;
     map->roughness = roughness;
-    landscape_flatten_landscape(map);
+    reset(map);
   }
-
   return map;
 }
 
@@ -99,29 +103,15 @@ void landscape_destroy_landscape(Landscape *map) {
   free(map);
 }
 
-bool landscape_raise_landscape(Landscape *map) {
-  // check that map has been reset
-  if (get(map, 0, 0) != get(map, 0, 0)) {
-    seed(map);
-    generate(map);
-
-    return true;
-  }
-
-  return false;
-}
-
-bool landscape_flatten_landscape(Landscape *map) {
-  for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
-  map->height_max = FLT_MIN;
-  map->height_min = FLT_MAX;
-  return true;
+void landscape_generate_landscape(Landscape *map) {
+  reset(map);
+  seed(map);
+  generate(map);
 }
 
 float landscape_get_height(Landscape *map, int x, int y) {
   // if (x >= map->size || y >= map->size) {
   //   return 0;
   // }
-
   return get(map, x, y);
 }
