@@ -25,6 +25,7 @@ void display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glBegin(GL_TRIANGLES);
+  // landscape
   glColor3f(255.0, 255.0, 255.0);
   for (int i = 0; i < landscape->size - 1; i++) {
     for (int j = 0; j < landscape->size - 1; j++) {
@@ -65,22 +66,101 @@ void display(void) {
           j + 1));
     }
   }
+  // close the shape
+  for (int i = 0; i < landscape->size - 1; i++) {
+    // x plane
+    glNormal3f(0, -1, 0);
+    glVertex3f(0, GRID_SPACING*i, landscape->height_min);
+    glVertex3f(0, GRID_SPACING*i, landscape_get_height(landscape, 0, i));
+    glVertex3f(0, GRID_SPACING*(i + 1), landscape_get_height(landscape, 0, i + 1));
+    glNormal3f(0, -1, 0);
+    glVertex3f(0, GRID_SPACING*i, landscape->height_min);
+    glVertex3f(0, GRID_SPACING*(i + 1), landscape->height_min);
+    glVertex3f(0, GRID_SPACING*(i + 1), landscape_get_height(landscape, 0, i + 1));
+
+    glNormal3f(0, 1, 0);
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*i, landscape->height_min);
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*i, landscape_get_height(landscape, (GRID_SIZE - 1)*GRID_SPACING, i));
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*(i + 1), landscape_get_height(landscape, (GRID_SIZE - 1)*GRID_SPACING, i + 1));
+    glNormal3f(0, 1, 0);
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*i, landscape->height_min);
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*(i + 1), landscape->height_min);
+    glVertex3f((GRID_SIZE - 1)*GRID_SPACING, GRID_SPACING*(i + 1), landscape_get_height(landscape, (GRID_SIZE - 1)*GRID_SPACING, i + 1));
+
+    // y plane
+    glNormal3f(-1, 0, 0);
+    glVertex3f(GRID_SPACING*i, 0, landscape->height_min);
+    glVertex3f(GRID_SPACING*i, 0, landscape_get_height(landscape, i, 0));
+    glVertex3f(GRID_SPACING*(i + 1), 0, landscape_get_height(landscape, i + 1, 0));
+    glNormal3f(-1, 0, 0);
+    glVertex3f(GRID_SPACING*i, 0, landscape->height_min);
+    glVertex3f(GRID_SPACING*(i + 1), 0, landscape->height_min);
+    glVertex3f(GRID_SPACING*(i + 1), 0, landscape_get_height(landscape, i + 1, 0));
+
+    glNormal3f(1, 0, 0);
+    glVertex3f(GRID_SPACING*i, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+    glVertex3f(GRID_SPACING*i, (GRID_SIZE - 1)*GRID_SPACING, landscape_get_height(landscape, i, (GRID_SIZE - 1)*GRID_SPACING));
+    glVertex3f(GRID_SPACING*(i + 1), (GRID_SIZE - 1)*GRID_SPACING, landscape_get_height(landscape, i + 1, (GRID_SIZE - 1)*GRID_SPACING));
+    glNormal3f(1, 0, 0);
+    glVertex3f(GRID_SPACING*i, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+    glVertex3f(GRID_SPACING*(i + 1), (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+    glVertex3f(GRID_SPACING*(i + 1), (GRID_SIZE - 1)*GRID_SPACING, landscape_get_height(landscape, i + 1, (GRID_SIZE - 1)*GRID_SPACING));
+  }
+  // draw water
   glColor3f(0.0, 0.0, 255.0);
+  // top
   glNormal3f(0.0, 0.0, 1.0);
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, 0.0);
-  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
   glNormal3f(0.0, 0.0, 1.0);
-  glVertex3f(0.0, 0.0, 0.0);
-  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, 0.0);
-  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+
+  // x-plane
+  glNormal3f(0.0, -1.0, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+  glVertex3f(0.0, 0.0, landscape->height_min);
+  glNormal3f(0.0, -1.0, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+
+  glNormal3f(0.0, 1.0, 0.0);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, landscape->height_min);
+  glNormal3f(0.0, 1.0, 0.0);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+
+  // y-plane
+  glNormal3f(-1.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, landscape->height_min);
+  glVertex3f(0.0, 0.0, landscape->height_min);
+  glNormal3f(-1.0, 0.0, 0.0);
+  glVertex3f(0.0, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, 0.0, landscape->height_min);
+
+  glNormal3f(1.0, 0.0, 0.0);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
+  glNormal3f(1.0, 0.0, 0.0);
+  glVertex3f(0.0, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, (landscape->height_max + landscape->height_min)/2);
+  glVertex3f((GRID_SIZE - 1)*GRID_SPACING, (GRID_SIZE - 1)*GRID_SPACING, landscape->height_min);
   glEnd();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glRotatef(rotation, 0.0, 0.0, 1.0); // spin
-  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING,
-      landscape_get_avg_height(landscape)); // center
+  glTranslatef(-0.5*(GRID_SIZE - 1)*GRID_SPACING, -0.5*(GRID_SIZE - 1)*GRID_SPACING, 0.0); // center
 
   glutSwapBuffers();
 }
@@ -96,7 +176,7 @@ void reshape(int w, int h) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-30.0*w/h, 30.0*w/h, -30.0, 30.0, -46.0, 46.0);
-  gluLookAt(0.0, -1.0, -0.4, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+  gluLookAt(0.0, -1.0, 0.4, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 }
 
 int main(int argc, char *argv[]) {

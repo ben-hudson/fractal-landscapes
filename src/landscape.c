@@ -1,5 +1,6 @@
 #include "landscape.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdlib.h>
 #include <time.h>
@@ -16,6 +17,12 @@ float get(Landscape *map, int x, int y) {
 
 void set(Landscape *map, int x, int y, float v) {
   map->heights[y*map->size + x] = v;
+  if (v > map->height_max) {
+    map->height_max = v;
+  }
+  if (v < map->height_min) {
+    map->height_min = v;
+  }
 }
 
 // ew
@@ -77,25 +84,18 @@ void generate(Landscape *map) {
 }
 
 Landscape *landscape_create_landscape(int size, float roughness) {
-  Landscape *map = (Landscape *)malloc(sizeof(Landscape));
+  Landscape *map = (Landscape *)malloc(sizeof(Landscape) + sizeof(float)*(size*size - 1));
 
   if (map) {
     map->size = size;
     map->roughness = roughness;
-    map->heights = (float *)malloc(sizeof(float)*size*size);
-    if (map->heights) {
     landscape_flatten_landscape(map);
-    } else {
-      free(map);
-      map = NULL;
-    }
   }
 
   return map;
 }
 
 void landscape_destroy_landscape(Landscape *map) {
-  free(map->heights);
   free(map);
 }
 
@@ -105,13 +105,6 @@ bool landscape_raise_landscape(Landscape *map) {
     seed(map);
     generate(map);
 
-    // average height is used for centering
-    map->avg_height = 0;
-    for (int i = 0; i < map->size*map->size; i++) {
-      map->avg_height += map->heights[i];
-    }
-    map->avg_height /= map->size*map->size;
-
     return true;
   }
 
@@ -120,7 +113,8 @@ bool landscape_raise_landscape(Landscape *map) {
 
 bool landscape_flatten_landscape(Landscape *map) {
   for (int i = 0; i < map->size*map->size; map->heights[i++] = NAN);
-  map->avg_height = 0;
+  map->height_max = FLT_MIN;
+  map->height_min = FLT_MAX;
   return true;
 }
 
@@ -130,8 +124,4 @@ float landscape_get_height(Landscape *map, int x, int y) {
   // }
 
   return get(map, x, y);
-}
-
-float landscape_get_avg_height(Landscape *map) {
-  return map->avg_height;
 }
