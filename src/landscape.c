@@ -106,6 +106,7 @@ bool landscape_raise_landscape(Landscape *map) {
     generate(map);
 
     // average height is used for centering
+    map->avg_height = 0;
     for (int i = 0; i < map->size*map->size; i++) {
       map->avg_height += map->heights[i];
     }
