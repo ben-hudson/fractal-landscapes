@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 
   // add light
   GLfloat light_position[4] = {0.0, 1.0, 1.0, 0.0};
-  GLfloat light_ambient[4] = {0.1, 0.1, 0.1, 1.0};
+  GLfloat light_ambient[4] = {0.2, 0.2, 0.2, 1.0};
   GLfloat light_specular[4] = {1.0, 1.0, 1.0, 1.0};
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
@@ -225,6 +225,7 @@ int main(int argc, char *argv[]) {
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_NORMALIZE);
 
   glutDisplayFunc(display);
   glutReshapeFunc(reshape);
